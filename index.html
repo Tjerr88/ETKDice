@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETK+ Dice Trainer</title>
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
+  background:#0f1115;
+  color:#fff;
+  padding:1rem;
+}
+h1,h2,h3{margin:.3rem 0}
+.card{
+  background:#1b1f27;
+  border-radius:14px;
+  padding:1rem;
+  margin-bottom:1rem;
+}
+button{
+  width:100%;
+  padding:1rem;
+  font-size:1.1rem;
+  border:none;
+  border-radius:14px;
+  background:#00c853;
+  color:#000;
+  font-weight:600;
+}
+button.secondary{
+  background:#2a2f3a;
+  color:#fff;
+}
+.timer{
+  font-size:3rem;
+  text-align:center;
+  margin:1rem 0;
+}
+.small{opacity:.75;font-size:.85rem}
+label{font-size:.85rem;opacity:.8}
+input{
+  width:100%;
+  padding:.5rem;
+  margin:.2rem 0 .7rem 0;
+  background:#2a2f3a;
+  border:none;
+  color:#fff;
+  border-radius:8px;
+}
+.hidden{display:none}
+.tabs button{margin-bottom:.5rem}
+hr{border:0;border-top:1px solid #333;margin:1rem 0}
+</style>
+</head>
+
+<body>
+
+<h1>ETK+ Dice</h1>
+
+<div class="tabs">
+  <button class="secondary" onclick="showTab('train')">Training</button>
+  <button class="secondary" onclick="showTab('settings')">Gewichten</button>
+</div>
+
+<div id="train" class="card"></div>
+<div id="timer" class="timer"></div>
+<button id="actionBtn" onclick="nextLift()">START</button>
+
+<div id="settings" class="card hidden">
+<h2>Gewichten per oefening</h2>
+
+<p class="small">In kg. Afronding gebeurt automatisch naar beneden op 4 kg.</p>
+
+<hr>
+
+<h3>Press</h3>
+<input id="cp" placeholder="Clean & Press 1RM">
+<input id="mp" placeholder="Military Press 1RM">
+<input id="pc" placeholder="Pat Casey Press 1RM">
+<input id="dcp_l" placeholder="Double C&P links 1RM">
+<input id="dcp_r" placeholder="Double C&P rechts 1RM">
+<input id="ss" placeholder="See-saw Press 1RM">
+
+<hr>
+
+<h3>Squat</h3>
+<input id="gob" placeholder="Goblet Squat 1RM">
+<input id="dfs_l" placeholder="Double Front Squat links 1RM">
+<input id="dfs_r" placeholder="Double Front Squat rechts 1RM">
+<input id="pis" placeholder="Pistol Squat 1RM">
+
+<hr>
+
+<h3>Ballistic Pull</h3>
+<input id="sw" placeholder="Swing 10RM">
+<input id="osw" placeholder="Overspeed Swing 10RM">
+<input id="dsw_l" placeholder="Double Swing links 10RM">
+<input id="dsw_r" placeholder="Double Swing rechts 10RM">
+<input id="sn" placeholder="Snatch 10RM">
+<input id="dsn_l" placeholder="Double Snatch links 10RM">
+<input id="dsn_r" placeholder="Double Snatch rechts 10RM">
+
+<hr>
+
+<h3>Push Press / Jerk</h3>
+<input id="vpp" placeholder="Viking Push Press 1RM">
+<input id="dvpp_l" placeholder="Double Viking PP links 1RM">
+<input id="dvpp_r" placeholder="Double Viking PP rechts 1RM">
+<input id="jerk" placeholder="Jerk 1RM">
+<input id="djerk_l" placeholder="Double Jerk links 1RM">
+<input id="djerk_r" placeholder="Double Jerk rechts 1RM">
+
+</div>
+
+<script>
+/* ---------------- DATA ---------------- */
+
+const sessions=[
+ {name:"Grinds – Heavy", effort:"100%", lifts:["press","squat","press","pullup"]},
+ {name:"Ballistics – Light", effort:"60%", lifts:["pull","push"]},
+ {name:"Grinds – Medium", effort:"80%", lifts:["press","squat","press","pullup"]},
+ {name:"Ballistics – Medium", effort:"80%", lifts:["pull","push"]},
+ {name:"Grinds – Light", effort:"60%", lifts:["press","squat","press","pullup"]},
+ {name:"Ballistics – Heavy", effort:"100%", lifts:["pull","push"]}
+];
+
+const exercises={
+ press:[
+  "Clean & Press","Military Press","Pat Casey Press",
+  "Double Clean & Press","High Stop Alternating Press","See-saw Press"
+ ],
+ squat:[
+  "Goblet Squat","Goblet Squat",
+  "Double Front Squat","Double Front Squat",
+  "Pistol Squat","Pistol Squat"
+ ],
+ pull:[
+  "Swing","Overspeed Swing","Double Swing",
+  "Fast cadence Snatch","Slow cadence Snatch","Double Snatch"
+ ],
+ push:[
+  "Viking Push Press","Double Viking Push Press","Jerk",
+  "Double Jerk","Double Clean & Jerk","Double Push Press FS"
+ ],
+ pullup:[
+  "Tactical Pull-up","Chin-up","Parallel Grip Pull-up",
+  "Ring Pull-up","Rope Pull-up","L Pull-up"
+ ]
+};
+
+const singlePct=[65,65,75,75,75,85];
+const doublePct=[[65,65],[65,75],[65,85],[75,75],[75,85],[85,85]];
+
+/* ---------------- STATE ---------------- */
+
+let s=0,l=0,timer=null,lock=null;
+
+/* ---------------- HELPERS ---------------- */
+
+function roll(){return Math.floor(Math.random()*6)+1}
+function roundKB(v){return Math.floor(v/4)*4}
+function kg(v,p){return roundKB(v*p/100)}
+function rm(id){return Number(document.getElementById(id)?.value||0)}
+
+async function awake(){
+ try{lock=await navigator.wakeLock.request("screen")}catch(e){}
+}
+
+function showTab(id){
+ document.getElementById("train").classList.add("hidden");
+ document.getElementById("settings").classList.add("hidden");
+ document.getElementById(id).classList.remove("hidden");
+}
+
+/* ---------------- TRAINING ---------------- */
+
+function nextLift(){
+ awake();
+ const session=sessions[s];
+ const type=session.lifts[l];
+ const er=roll(), lr=roll(), tr=roll()+roll();
+ const ex=exercises[type][er-1];
+
+ let weight="—";
+ let ladder="";
+
+ if(session.name.includes("Grinds"))
+   ladder="Ladder: 1-2-3-4-5";
+
+ if(type==="pull"||type==="push"){
+   ladder=ex.includes("Double")?"Ladder: 2-4-6-8-10":"Ladder: 5-10-15-20";
+ }
+
+ document.getElementById("train").innerHTML=
+ `<h2>${session.name}</h2>
+  <div class="small">Effort ${session.effort}</div>
+  <hr>
+  <h3>${ex}</h3>
+  <div>Tijd: <strong>${tr} min</strong></div>
+  <div class="small">${ladder}</div>`;
+
+ startTimer(tr);
+
+ l++;
+ if(l>=session.lifts.length){
+   document.getElementById("actionBtn").textContent="FINISH TRAINING";
+   document.getElementById("actionBtn").onclick=()=>{};
+ }
+}
+
+function startTimer(m){
+ clearInterval(timer);
+ let sec=m*60;
+ timer=setInterval(()=>{
+  sec--;
+  document.getElementById("timer").textContent=
+   Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0");
+  if(sec%60===0)
+   new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=").play();
+  if(sec<=0)clearInterval(timer);
+ },1000);
+}
+</script>
+
+</body>
+</html>
