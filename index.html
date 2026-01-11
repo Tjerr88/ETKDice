@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ETK+ Dice Trainer (MILO) — Pro</title>
+<title>ETK+</title>
 <style>
   :root{
     --bg:#0b0f14;
@@ -225,6 +225,45 @@
   .footerNote{
     font-size:12px;color:var(--muted2);line-height:1.35;
   }
+
+  /* ---------- Mobile-first improvements ---------- */
+  body{
+    /* respect notches + reduce wasted space on small screens */
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  }
+  *{ -webkit-tap-highlight-color: transparent; }
+  button, .tab{ touch-action: manipulation; }
+  input, select{ font-size:16px; } /* prevent iOS zoom */
+
+  .topbar{ top: max(10px, env(safe-area-inset-top)); }
+  .tabs{ gap:6px; }
+  .tab{ padding:10px 12px; }
+
+  /* Keep important actions visible and easy to hit */
+  .btnRow button{ min-height: 50px; }
+
+  /* Timer scales down nicely on smaller devices */
+  @media (max-width: 420px){
+    .timer{ font-size: 40px; }
+    .wrap{ gap:12px; }
+    .card{ padding:12px; }
+    .topbar{ padding:12px; }
+    .logo{ width:34px; height:34px; border-radius:13px; }
+    .title strong{ font-size:13px; }
+    .title span{ font-size:11px; }
+  }
+
+  /* Make the right-side calendar collapsible on mobile */
+  @media (max-width: 900px){
+    .grid{ grid-template-columns: 1fr; }
+    #calendarCard{ order: 2; }
+    #trainCard{ order: 1; }
+    .calendarHeaderActions{ display:none; } /* we expose a dedicated mobile toggle instead */
+    .calendarCardBody.collapsed{ display:none; }
+    .mobileCalendarToggle{ display:block; }
+  }
+  .mobileCalendarToggle{ display:none; margin-top:10px; }
+
 </style>
 </head>
 
@@ -247,7 +286,7 @@
 
   <div id="trainTab" class="grid">
     <!-- LEFT: Current day + lift -->
-    <div class="card">
+    <div id="trainCard" class="card">
       <div class="row">
         <div class="pill"><span class="dot"></span><span id="dayPill">Dag</span></div>
         <div class="pill" id="effortPill">Effort</div>
@@ -318,7 +357,7 @@
     </div>
 
     <!-- RIGHT: Calendar / 2-week plan -->
-    <div class="card">
+    <div id="calendarCard" class="card">
       <div class="row">
         <div>
           <div class="h2">2-week microcycle</div>
@@ -329,16 +368,23 @@
 
       <div class="hr"></div>
 
-      <div class="twoCols">
+      <div class="twoCols calendarHeaderActions">
         <button class="secondary" onclick="jumpToToday()">Ga naar vandaag</button>
         <button class="secondary" onclick="toggleWeek()">Wissel week (1/2)</button>
       </div>
+
+      <button id="mobileCalendarToggle" class="secondary mobileCalendarToggle" onclick="toggleCalendar()">Toon/Verberg schema</button>
+
+      <div id="calendarBody" class="calendarCardBody">
 
       <div class="hr"></div>
 
       <div id="calendarList" class="list"></div>
 
       <div class="hr"></div>
+      </div>
+
+      
 
       <div class="mini">
         <b>Grinds-dag</b> = Press 1, Squat, Press 2, Pull-up •
@@ -1347,12 +1393,39 @@ async function importSettings(){
   }
 }
 
+
+/* ------------------------ MOBILE UX ------------------------ */
+function toggleCalendar(force){
+  const body = document.getElementById("calendarBody");
+  if(!body) return;
+  const collapsed = body.classList.toggle("collapsed", force===undefined ? !body.classList.contains("collapsed") : force);
+  const btn = document.getElementById("mobileCalendarToggle");
+  if(btn) btn.textContent = collapsed ? "Toon schema" : "Verberg schema";
+  // keep in state so it survives refresh
+  try{
+    state.calendarCollapsed = collapsed;
+    saveState();
+  }catch(e){}
+}
+
+
 /* ------------------------ INIT ------------------------ */
 
 function init(){
   ensureDayPlan();
   render();
   updatePrimaryBtn();
+
+  // Mobile: collapse calendar by default (but respect saved preference)
+  const isMobile = window.matchMedia && window.matchMedia("(max-width: 900px)").matches;
+  if(isMobile){
+    const saved = !!state.calendarCollapsed;
+    // If never set, default collapsed = true for mobile
+    toggleCalendar(saved ? true : true);
+  }else{
+    // Desktop: always show
+    toggleCalendar(false);
+  }
 }
 init();
 </script>
