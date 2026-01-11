@@ -1,229 +1,1360 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ETK+ Dice Trainer</title>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ETK+ Dice Trainer (MILO) — Pro</title>
 <style>
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto;
-  background:#0f1115;
-  color:#fff;
-  padding:1rem;
-}
-h1,h2,h3{margin:.3rem 0}
-.card{
-  background:#1b1f27;
-  border-radius:14px;
-  padding:1rem;
-  margin-bottom:1rem;
-}
-button{
-  width:100%;
-  padding:1rem;
-  font-size:1.1rem;
-  border:none;
-  border-radius:14px;
-  background:#00c853;
-  color:#000;
-  font-weight:600;
-}
-button.secondary{
-  background:#2a2f3a;
-  color:#fff;
-}
-.timer{
-  font-size:3rem;
-  text-align:center;
-  margin:1rem 0;
-}
-.small{opacity:.75;font-size:.85rem}
-label{font-size:.85rem;opacity:.8}
-input{
-  width:100%;
-  padding:.5rem;
-  margin:.2rem 0 .7rem 0;
-  background:#2a2f3a;
-  border:none;
-  color:#fff;
-  border-radius:8px;
-}
-.hidden{display:none}
-.tabs button{margin-bottom:.5rem}
-hr{border:0;border-top:1px solid #333;margin:1rem 0}
+  :root{
+    --bg:#0b0f14;
+    --panel:#121824;
+    --panel2:#0f1520;
+    --text:#eaf0ff;
+    --muted:rgba(234,240,255,.72);
+    --muted2:rgba(234,240,255,.55);
+    --line:rgba(255,255,255,.08);
+    --accent:#19d47b;
+    --accent2:#6ee7b7;
+    --danger:#ff5a7a;
+    --warn:#ffcc66;
+    --shadow: 0 18px 45px rgba(0,0,0,.35);
+    --radius:18px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    background:
+      radial-gradient(1200px 800px at 10% 0%, rgba(25,212,123,.16), transparent 60%),
+      radial-gradient(900px 700px at 90% 10%, rgba(110,231,183,.10), transparent 55%),
+      radial-gradient(700px 500px at 50% 100%, rgba(102,153,255,.08), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    padding:18px;
+  }
+
+  .wrap{max-width:980px;margin:0 auto;display:grid;gap:14px}
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:14px 14px;
+    background:linear-gradient(180deg, rgba(18,24,36,.92), rgba(15,21,32,.92));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    position:sticky; top:12px; z-index:10;
+    backdrop-filter: blur(10px);
+  }
+  .brand{
+    display:flex;align-items:center;gap:10px;min-width:0;
+  }
+  .logo{
+    width:38px;height:38px;border-radius:14px;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.22), transparent 55%),
+                linear-gradient(135deg, rgba(25,212,123,.95), rgba(110,231,183,.35));
+    box-shadow: 0 10px 28px rgba(25,212,123,.18);
+    border:1px solid rgba(255,255,255,.10);
+  }
+  .title{
+    display:flex;flex-direction:column;line-height:1.1;min-width:0;
+  }
+  .title strong{font-size:14px;letter-spacing:.3px}
+  .title span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  .tabs{display:flex;gap:8px;flex-wrap:wrap}
+  .tab{
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.04);
+    color:var(--text);
+    padding:10px 12px;
+    border-radius:14px;
+    font-weight:650;
+    font-size:13px;
+    cursor:pointer;
+    transition:.15s transform, .15s background, .15s border-color;
+    user-select:none;
+  }
+  .tab:hover{transform:translateY(-1px);background:rgba(255,255,255,.06)}
+  .tab.active{
+    background:linear-gradient(180deg, rgba(25,212,123,.16), rgba(255,255,255,.04));
+    border-color:rgba(25,212,123,.40);
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns: 1.05fr .95fr;
+    gap:14px;
+  }
+  @media (max-width: 900px){
+    .grid{grid-template-columns:1fr}
+  }
+
+  .card{
+    background:linear-gradient(180deg, rgba(18,24,36,.92), rgba(15,21,32,.92));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px;
+    box-shadow:var(--shadow);
+  }
+
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .pill{
+    display:inline-flex;align-items:center;gap:8px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.04);
+    padding:8px 10px;border-radius:999px;
+    color:var(--muted);
+    font-size:12px;
+    white-space:nowrap;
+  }
+  .dot{width:8px;height:8px;border-radius:99px;background:var(--accent);box-shadow:0 0 0 4px rgba(25,212,123,.12)}
+  .muted{color:var(--muted)}
+  .muted2{color:var(--muted2)}
+  .h2{font-size:14px;margin:0 0 6px 0;letter-spacing:.2px}
+  .h3{font-size:13px;margin:0 0 8px 0;color:var(--muted)}
+  .big{
+    font-size:18px;font-weight:800;letter-spacing:.2px;margin:0 0 4px 0;
+  }
+  .hr{height:1px;background:var(--line);margin:12px 0}
+
+  .btnRow{display:grid;grid-template-columns: 1fr 1fr;gap:10px}
+  @media(max-width:540px){.btnRow{grid-template-columns:1fr}}
+  button{
+    width:100%;
+    border:none;
+    border-radius:16px;
+    padding:13px 12px;
+    font-weight:800;
+    font-size:14px;
+    cursor:pointer;
+    transition:.12s transform, .12s filter;
+    user-select:none;
+  }
+  button:active{transform:translateY(1px)}
+  .primary{
+    background:linear-gradient(135deg, rgba(25,212,123,.98), rgba(110,231,183,.55));
+    color:#06120b;
+    box-shadow: 0 14px 34px rgba(25,212,123,.18);
+  }
+  .secondary{
+    background:rgba(255,255,255,.06);
+    color:var(--text);
+    border:1px solid var(--line);
+  }
+  .danger{
+    background:rgba(255,90,122,.16);
+    color:var(--text);
+    border:1px solid rgba(255,90,122,.35);
+  }
+
+  .timerWrap{
+    display:grid;gap:10px;place-items:center;
+    padding:14px;border-radius:var(--radius);
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--line);
+  }
+  .timer{
+    font-variant-numeric: tabular-nums;
+    font-size:46px;
+    font-weight:900;
+    letter-spacing:.6px;
+    margin:0;
+    line-height:1;
+  }
+  .subTimer{font-size:12px;color:var(--muted);text-align:center;line-height:1.4}
+  .progress{
+    width:100%;
+    height:10px;
+    border-radius:99px;
+    background:rgba(255,255,255,.06);
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .bar{height:100%;width:0%;background:linear-gradient(90deg, rgba(25,212,123,.95), rgba(110,231,183,.45))}
+  .select, input{
+    width:100%;
+    padding:12px 12px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.04);
+    color:var(--text);
+    outline:none;
+    font-weight:650;
+  }
+  input::placeholder{color:rgba(234,240,255,.35)}
+  .twoCols{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  }
+  @media(max-width:540px){.twoCols{grid-template-columns:1fr}}
+  .mini{
+    font-size:12px;color:var(--muted2);line-height:1.35;
+  }
+  .tag{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:12px;font-weight:800;
+    padding:6px 10px;border-radius:999px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.04);
+    color:var(--text);
+  }
+  .tag.good{border-color:rgba(25,212,123,.35);background:rgba(25,212,123,.10)}
+  .tag.warn{border-color:rgba(255,204,102,.35);background:rgba(255,204,102,.10)}
+  .tag.bad{border-color:rgba(255,90,122,.35);background:rgba(255,90,122,.10)}
+
+  .list{display:grid;gap:10px}
+  .item{
+    padding:12px;border-radius:16px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.03);
+  }
+  .item .top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+  .item .name{font-weight:900;font-size:15px;margin:0}
+  .item .meta{font-size:12px;color:var(--muted);line-height:1.35;margin-top:6px}
+  .kbd{
+    font-size:11px;
+    padding:4px 7px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.04);
+    color:var(--muted);
+    white-space:nowrap;
+  }
+  .hidden{display:none !important}
+
+  .footerNote{
+    font-size:12px;color:var(--muted2);line-height:1.35;
+  }
 </style>
 </head>
 
 <body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div class="title">
+        <strong>ETK+ Dice Trainer</strong>
+        <span>MILO-template • 2-week microcycle • 2d6 tijd • 1d6 oefening + 1d6 gewicht</span>
+      </div>
+    </div>
+    <div class="tabs">
+      <div id="tabTrain" class="tab active" onclick="showTab('train')">Training</div>
+      <div id="tabSettings" class="tab" onclick="showTab('settings')">Gewichten</div>
+      <div class="tab" onclick="showTab('about')">Info</div>
+    </div>
+  </div>
 
-<h1>ETK+ Dice</h1>
+  <div id="trainTab" class="grid">
+    <!-- LEFT: Current day + lift -->
+    <div class="card">
+      <div class="row">
+        <div class="pill"><span class="dot"></span><span id="dayPill">Dag</span></div>
+        <div class="pill" id="effortPill">Effort</div>
+      </div>
 
-<div class="tabs">
-  <button class="secondary" onclick="showTab('train')">Training</button>
-  <button class="secondary" onclick="showTab('settings')">Gewichten</button>
-</div>
+      <div class="hr"></div>
 
-<div id="train" class="card"></div>
-<div id="timer" class="timer"></div>
-<button id="actionBtn" onclick="nextLift()">START</button>
+      <div class="row" style="align-items:flex-end">
+        <div style="min-width:0">
+          <div class="big" id="sessionName">—</div>
+          <div class="muted" id="sessionPlan">—</div>
+        </div>
+        <div class="kbd" id="liftCounter">Lift 0/0</div>
+      </div>
 
-<div id="settings" class="card hidden">
-<h2>Gewichten per oefening</h2>
+      <div class="hr"></div>
 
-<p class="small">In kg. Afronding gebeurt automatisch naar beneden op 4 kg.</p>
+      <div class="list">
+        <div class="item">
+          <div class="top">
+            <div style="min-width:0">
+              <p class="name" id="exerciseName">Klaar om te starten</p>
+              <div class="meta" id="exerciseMeta">Klik <b>Start lift</b> om te rollen: oefening + tijd + gewicht.</div>
+            </div>
+            <span class="tag" id="typeTag">—</span>
+          </div>
 
-<hr>
+          <div class="hr"></div>
 
-<h3>Press</h3>
-<input id="cp" placeholder="Clean & Press 1RM">
-<input id="mp" placeholder="Military Press 1RM">
-<input id="pc" placeholder="Pat Casey Press 1RM">
-<input id="dcp_l" placeholder="Double C&P links 1RM">
-<input id="dcp_r" placeholder="Double C&P rechts 1RM">
-<input id="ss" placeholder="See-saw Press 1RM">
+          <div class="twoCols">
+            <div>
+              <div class="mini">Ladder (ETK+)</div>
+              <select id="ladderSelect" class="select"></select>
+              <div class="mini" style="margin-top:8px">Tip: verkort de ladder aan het einde van de ronde als explosiviteit/kwaliteit zakt.</div>
+            </div>
+            <div>
+              <div class="mini">Gewicht (op basis van jouw 1RM/10RM + dobbelsteen)</div>
+              <div style="display:grid;gap:8px;margin-top:6px">
+                <div class="pill" style="justify-content:space-between">
+                  <span>Roll</span>
+                  <span><b id="diceRolls">—</b></span>
+                </div>
+                <div class="pill" style="justify-content:space-between">
+                  <span>Load</span>
+                  <span><b id="weightOut">—</b></span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-<hr>
+        </div>
 
-<h3>Squat</h3>
-<input id="gob" placeholder="Goblet Squat 1RM">
-<input id="dfs_l" placeholder="Double Front Squat links 1RM">
-<input id="dfs_r" placeholder="Double Front Squat rechts 1RM">
-<input id="pis" placeholder="Pistol Squat 1RM">
+        <div class="timerWrap">
+          <p class="timer" id="timerText">0:00</p>
+          <div class="progress"><div class="bar" id="timerBar"></div></div>
+          <div class="subTimer" id="timerHint">De timer piept elke minuut. Wake lock wordt geprobeerd op mobiele apparaten.</div>
+        </div>
 
-<hr>
+        <div class="btnRow">
+          <button id="primaryBtn" class="primary" onclick="startOrNext()">Start lift</button>
+          <button class="secondary" onclick="reroll()">Reroll</button>
+          <button class="secondary" onclick="advanceDay()">Volgende dag</button>
+          <button class="danger" onclick="resetAll()">Reset</button>
+        </div>
 
-<h3>Ballistic Pull</h3>
-<input id="sw" placeholder="Swing 10RM">
-<input id="osw" placeholder="Overspeed Swing 10RM">
-<input id="dsw_l" placeholder="Double Swing links 10RM">
-<input id="dsw_r" placeholder="Double Swing rechts 10RM">
-<input id="sn" placeholder="Snatch 10RM">
-<input id="dsn_l" placeholder="Double Snatch links 10RM">
-<input id="dsn_r" placeholder="Double Snatch rechts 10RM">
+        <div class="footerNote" id="footerNote"></div>
+      </div>
+    </div>
 
-<hr>
+    <!-- RIGHT: Calendar / 2-week plan -->
+    <div class="card">
+      <div class="row">
+        <div>
+          <div class="h2">2-week microcycle</div>
+          <div class="h3">Selecteer dag of laat de app doorrollen</div>
+        </div>
+        <div class="pill">Auto-save: <b>aan</b></div>
+      </div>
 
-<h3>Push Press / Jerk</h3>
-<input id="vpp" placeholder="Viking Push Press 1RM">
-<input id="dvpp_l" placeholder="Double Viking PP links 1RM">
-<input id="dvpp_r" placeholder="Double Viking PP rechts 1RM">
-<input id="jerk" placeholder="Jerk 1RM">
-<input id="djerk_l" placeholder="Double Jerk links 1RM">
-<input id="djerk_r" placeholder="Double Jerk rechts 1RM">
+      <div class="hr"></div>
 
+      <div class="twoCols">
+        <button class="secondary" onclick="jumpToToday()">Ga naar vandaag</button>
+        <button class="secondary" onclick="toggleWeek()">Wissel week (1/2)</button>
+      </div>
+
+      <div class="hr"></div>
+
+      <div id="calendarList" class="list"></div>
+
+      <div class="hr"></div>
+
+      <div class="mini">
+        <b>Grinds-dag</b> = Press 1, Squat, Press 2, Pull-up •
+        <b>Ballistics-dag</b> = Pull, Push Press/Jerk •
+        <b>Variety</b> = (1) Grind naar keuze + (2) Ballistic naar keuze (+ optioneel Pull-up) •
+        <b>Off</b> = geen training.
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsTab" class="card hidden">
+    <div class="row">
+      <div>
+        <div class="h2">Gewichten per oefening</div>
+        <div class="h3">Jouw 1RM voor grinds • jouw 10RM voor ballistics</div>
+      </div>
+      <button class="secondary" onclick="saveSettings()">Opslaan</button>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="mini">
+      <b>Jouw 1RM-logica (behouden):</b> gewicht = % van ingevulde RM, afgerond <b>naar beneden op 4 kg</b>.
+      <br/>
+      <b>Dobbelsteen → %:</b> <span class="muted2">single</span> 65/65/75/75/75/85 • <span class="muted2">double</span> (L+L, L+M, L+H, M+M, M+H, H+H).
+      <br/>
+      Als je iets niet invult, toont de app <b>—</b> i.p.v. een (fout) gewicht.
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="list" id="settingsList"></div>
+
+    <div class="hr"></div>
+
+    <div class="twoCols">
+      <button class="secondary" onclick="exportSettings()">Export settings</button>
+      <button class="secondary" onclick="importSettings()">Import settings</button>
+    </div>
+    <div class="mini" style="margin-top:10px">Export/Import werkt via clipboard (JSON). Geen externe dependencies.</div>
+  </div>
+
+  <div id="aboutTab" class="card hidden">
+    <div class="h2">Hoe dit matcht met ETK+ (MILO)</div>
+    <div class="hr"></div>
+    <div class="mini" style="display:grid;gap:10px">
+      <div>
+        <b>Dobbelstenen:</b> elke lift rolt <b>1d6 oefening</b>, <b>1d6 gewicht</b> en <b>2d6 tijd</b> (2–12 min).
+      </div>
+      <div>
+        <b>Ladders:</b> selecteer per lift de ladder uit de ETK+ opties (grinds / single quick lifts / double quick lifts).
+      </div>
+      <div>
+        <b>Effort:</b> Heavy = 100%, Medium = 70–80%, Light = 50–60% (wordt als richtlijn getoond op de dag).
+      </div>
+      <div>
+        <b>Schema:</b> 2-week microcycle inclusief Variety en Off days.
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-/* ---------------- DATA ---------------- */
+/* ------------------------ ETK+ CORE (MILO) ------------------------ */
 
-const sessions=[
- {name:"Grinds – Heavy", effort:"100%", lifts:["press","squat","press","pullup"]},
- {name:"Ballistics – Light", effort:"60%", lifts:["pull","push"]},
- {name:"Grinds – Medium", effort:"80%", lifts:["press","squat","press","pullup"]},
- {name:"Ballistics – Medium", effort:"80%", lifts:["pull","push"]},
- {name:"Grinds – Light", effort:"60%", lifts:["press","squat","press","pullup"]},
- {name:"Ballistics – Heavy", effort:"100%", lifts:["pull","push"]}
+/**
+ * Week 1
+ * Mon: Grinds Heavy
+ * Tue: Ballistics Light
+ * Wed: Variety
+ * Thu: Grinds Medium
+ * Fri: Ballistics Medium
+ * Sat: Variety
+ * Sun: Off
+ *
+ * Week 2
+ * Mon: Grinds Light
+ * Tue: Ballistics Heavy
+ * Wed: Variety
+ * Thu: Grinds Medium
+ * Fri: Ballistics Medium
+ * Sat: Variety
+ * Sun: Off
+ */
+
+const DAYS = [
+  {week:1, dow:"Ma", kind:"GRINDS", effort:"HEAVY"},
+  {week:1, dow:"Di", kind:"BALLISTICS", effort:"LIGHT"},
+  {week:1, dow:"Wo", kind:"VARIETY", effort:"VARIETY"},
+  {week:1, dow:"Do", kind:"GRINDS", effort:"MEDIUM"},
+  {week:1, dow:"Vr", kind:"BALLISTICS", effort:"MEDIUM"},
+  {week:1, dow:"Za", kind:"VARIETY", effort:"VARIETY"},
+  {week:1, dow:"Zo", kind:"OFF", effort:"OFF"},
+
+  {week:2, dow:"Ma", kind:"GRINDS", effort:"LIGHT"},
+  {week:2, dow:"Di", kind:"BALLISTICS", effort:"HEAVY"},
+  {week:2, dow:"Wo", kind:"VARIETY", effort:"VARIETY"},
+  {week:2, dow:"Do", kind:"GRINDS", effort:"MEDIUM"},
+  {week:2, dow:"Vr", kind:"BALLISTICS", effort:"MEDIUM"},
+  {week:2, dow:"Za", kind:"VARIETY", effort:"VARIETY"},
+  {week:2, dow:"Zo", kind:"OFF", effort:"OFF"},
 ];
 
-const exercises={
- press:[
-  "Clean & Press","Military Press","Pat Casey Press",
-  "Double Clean & Press","High Stop Alternating Press","See-saw Press"
- ],
- squat:[
-  "Goblet Squat","Goblet Squat",
-  "Double Front Squat","Double Front Squat",
-  "Pistol Squat","Pistol Squat"
- ],
- pull:[
-  "Swing","Overspeed Swing","Double Swing",
-  "Fast cadence Snatch","Slow cadence Snatch","Double Snatch"
- ],
- push:[
-  "Viking Push Press","Double Viking Push Press","Jerk",
-  "Double Jerk","Double Clean & Jerk","Double Push Press FS"
- ],
- pullup:[
-  "Tactical Pull-up","Chin-up","Parallel Grip Pull-up",
-  "Ring Pull-up","Rope Pull-up","L Pull-up"
- ]
+// Exercise pools (1d6 each)
+const EXERCISES = {
+  press: [
+    {name:"Clean & Press", key:"cp", type:"GRIND_SINGLE", rmType:"1RM"},
+    {name:"Military Press", key:"mp", type:"GRIND_SINGLE", rmType:"1RM"},
+    {name:"Pat Casey Press", key:"pc", type:"GRIND_SINGLE", rmType:"1RM"},
+    {name:"Double Clean & Press", key:"dcp", type:"GRIND_DOUBLE", rmType:"1RM"},
+    {name:"High Stop Alternating Press", key:"hsap", type:"GRIND_SINGLE", rmType:"1RM"},
+    {name:"See-saw Press", key:"ss", type:"GRIND_SINGLE", rmType:"1RM"},
+  ],
+  squat: [
+    {name:"Goblet Squat", key:"gob", type:"GRIND_SINGLE", rmType:"1RM"},
+    {name:"Goblet Squat", key:"gob", type:"GRIND_SINGLE", rmType:"1RM"},
+    {name:"Double Front Squat", key:"dfs", type:"GRIND_DOUBLE", rmType:"1RM"},
+    {name:"Double Front Squat", key:"dfs", type:"GRIND_DOUBLE", rmType:"1RM"},
+    {name:"Pistol Squat", key:"pis", type:"GRIND_SINGLE", rmType:"1RM"},
+    {name:"Pistol Squat", key:"pis", type:"GRIND_SINGLE", rmType:"1RM"},
+  ],
+  pull: [
+    {name:"Swing", key:"sw", type:"BALLISTIC_SINGLE", rmType:"10RM"},
+    {name:"Overspeed Swing", key:"osw", type:"BALLISTIC_SINGLE", rmType:"10RM"},
+    {name:"Double Swing", key:"dsw", type:"BALLISTIC_DOUBLE", rmType:"10RM"},
+    {name:"Fast cadence Snatch", key:"sn", type:"BALLISTIC_SINGLE", rmType:"10RM"},
+    {name:"Slow cadence Snatch", key:"sn", type:"BALLISTIC_SINGLE", rmType:"10RM"},
+    {name:"Double Snatch", key:"dsn", type:"BALLISTIC_DOUBLE", rmType:"10RM"},
+  ],
+  push: [
+    {name:"Viking Push Press", key:"vpp", type:"GRIND_SINGLE", rmType:"1RM"},
+    {name:"Double Viking Push Press", key:"dvpp", type:"GRIND_DOUBLE", rmType:"1RM"},
+    {name:"Jerk", key:"jerk", type:"BALLISTIC_SINGLE", rmType:"10RM"}, // user wanted jerk/PP as ballistic-like (10RM)
+    {name:"Double Jerk", key:"djerk", type:"BALLISTIC_DOUBLE", rmType:"10RM"},
+    {name:"Double Clean & Jerk", key:"dcj", type:"BALLISTIC_DOUBLE", rmType:"10RM"},
+    {name:"Double Push Press (Front Squat)", key:"dppfs", type:"BALLISTIC_DOUBLE", rmType:"10RM"},
+  ],
+  pullup: [
+    {name:"Tactical Pull-up", key:"pu", type:"BODYWEIGHT", rmType:"—"},
+    {name:"Chin-up", key:"pu", type:"BODYWEIGHT", rmType:"—"},
+    {name:"Parallel Grip Pull-up", key:"pu", type:"BODYWEIGHT", rmType:"—"},
+    {name:"Ring Pull-up", key:"pu", type:"BODYWEIGHT", rmType:"—"},
+    {name:"Rope Pull-up", key:"pu", type:"BODYWEIGHT", rmType:"—"},
+    {name:"L Pull-up", key:"pu", type:"BODYWEIGHT", rmType:"—"},
+  ],
 };
 
-const singlePct=[65,65,75,75,75,85];
-const doublePct=[[65,65],[65,75],[65,85],[75,75],[75,85],[85,85]];
+// Day templates
+const DAY_TEMPLATES = {
+  GRINDS: ["press","squat","press","pullup"],
+  BALLISTICS: ["pull","push"],
+  VARIETY: ["var_grind","var_ballistic","var_optional_pullup"], // implemented below
+  OFF: []
+};
 
-/* ---------------- STATE ---------------- */
+// Dice → % logic (kept exactly as your concept)
+const singlePct = [65,65,75,75,75,85]; // 1..6
+const doublePct = [
+  [65,65], // 1: L+L
+  [65,75], // 2: L+M
+  [65,85], // 3: L+H
+  [75,75], // 4: M+M
+  [75,85], // 5: M+H
+  [85,85], // 6: H+H
+];
 
-let s=0,l=0,timer=null,lock=null;
+/* ------------------------ STORAGE ------------------------ */
 
-/* ---------------- HELPERS ---------------- */
+const LS_KEY = "etkplus_pro_v1";
+const LS_SETTINGS = "etkplus_pro_settings_v1";
 
-function roll(){return Math.floor(Math.random()*6)+1}
-function roundKB(v){return Math.floor(v/4)*4}
-function kg(v,p){return roundKB(v*p/100)}
-function rm(id){return Number(document.getElementById(id)?.value||0)}
+let state = loadState();
+let settings = loadSettings();
 
-async function awake(){
- try{lock=await navigator.wakeLock.request("screen")}catch(e){}
+/* ------------------------ UI HELPERS ------------------------ */
+
+function $(id){ return document.getElementById(id); }
+function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+function roll1d6(){ return Math.floor(Math.random()*6)+1; }
+function roll2d6(){ return roll1d6()+roll1d6(); }
+
+function roundKB(v){
+  if(!v || !isFinite(v)) return 0;
+  return Math.floor(v/4)*4;
+}
+function pctOf(v, p){
+  if(!v || !isFinite(v)) return 0;
+  return roundKB(v * (p/100));
+}
+function fmtWeight(w){
+  if(!w || !isFinite(w) || w<=0) return "—";
+  return `${w} kg`;
+}
+function fmtPair(a,b){
+  if(!a || !b) return "—";
+  return `${a} + ${b} kg`;
 }
 
-function showTab(id){
- document.getElementById("train").classList.add("hidden");
- document.getElementById("settings").classList.add("hidden");
- document.getElementById(id).classList.remove("hidden");
+function showTab(which){
+  $("trainTab").classList.add("hidden");
+  $("settingsTab").classList.add("hidden");
+  $("aboutTab").classList.add("hidden");
+  $("tabTrain").classList.remove("active");
+  $("tabSettings").classList.remove("active");
+
+  if(which==="train"){ $("trainTab").classList.remove("hidden"); $("tabTrain").classList.add("active"); }
+  if(which==="settings"){ $("settingsTab").classList.remove("hidden"); $("tabSettings").classList.add("active"); renderSettings(); }
+  if(which==="about"){ $("aboutTab").classList.remove("hidden"); }
+  saveState();
 }
 
-/* ---------------- TRAINING ---------------- */
+/* ------------------------ SETTINGS MODEL ------------------------ */
+/**
+ * We keep your "per lift RM input" approach.
+ * For doubles, you previously used L/R fields; we still support that:
+ * - If both L and R exist and are filled, we average them.
+ * - Otherwise we use the one that exists.
+ */
+const SETTINGS_SCHEMA = [
+  // Press
+  {group:"Press", items:[
+    {key:"cp", label:"Clean & Press", rmType:"1RM"},
+    {key:"mp", label:"Military Press", rmType:"1RM"},
+    {key:"pc", label:"Pat Casey Press", rmType:"1RM"},
+    {key:"dcp", label:"Double Clean & Press (avg L/R)", rmType:"1RM", lr:true},
+    {key:"hsap", label:"High Stop Alternating Press", rmType:"1RM"},
+    {key:"ss", label:"See-saw Press", rmType:"1RM"},
+  ]},
+  // Squat
+  {group:"Squat", items:[
+    {key:"gob", label:"Goblet Squat", rmType:"1RM"},
+    {key:"dfs", label:"Double Front Squat (avg L/R)", rmType:"1RM", lr:true},
+    {key:"pis", label:"Pistol Squat", rmType:"1RM"},
+  ]},
+  // Ballistic Pull
+  {group:"Ballistic Pull", items:[
+    {key:"sw", label:"Swing", rmType:"10RM"},
+    {key:"osw", label:"Overspeed Swing", rmType:"10RM"},
+    {key:"dsw", label:"Double Swing (avg L/R)", rmType:"10RM", lr:true},
+    {key:"sn", label:"Snatch (fast/slow cadence)", rmType:"10RM"},
+    {key:"dsn", label:"Double Snatch (avg L/R)", rmType:"10RM", lr:true},
+  ]},
+  // Push Press / Jerk
+  {group:"Push Press / Jerk", items:[
+    {key:"vpp", label:"Viking Push Press", rmType:"1RM"},
+    {key:"dvpp", label:"Double Viking Push Press (avg L/R)", rmType:"1RM", lr:true},
+    {key:"jerk", label:"Jerk", rmType:"10RM"},
+    {key:"djerk", label:"Double Jerk (avg L/R)", rmType:"10RM", lr:true},
+    {key:"dcj", label:"Double Clean & Jerk", rmType:"10RM"},
+    {key:"dppfs", label:"Double Push Press (Front Squat)", rmType:"10RM"},
+  ]},
+];
 
-function nextLift(){
- awake();
- const session=sessions[s];
- const type=session.lifts[l];
- const er=roll(), lr=roll(), tr=roll()+roll();
- const ex=exercises[type][er-1];
+function getRM(key){
+  const v = settings?.[key];
+  if(!v) return 0;
 
- let weight="—";
- let ladder="";
-
- if(session.name.includes("Grinds"))
-   ladder="Ladder: 1-2-3-4-5";
-
- if(type==="pull"||type==="push"){
-   ladder=ex.includes("Double")?"Ladder: 2-4-6-8-10":"Ladder: 5-10-15-20";
- }
-
- document.getElementById("train").innerHTML=
- `<h2>${session.name}</h2>
-  <div class="small">Effort ${session.effort}</div>
-  <hr>
-  <h3>${ex}</h3>
-  <div>Tijd: <strong>${tr} min</strong></div>
-  <div class="small">${ladder}</div>`;
-
- startTimer(tr);
-
- l++;
- if(l>=session.lifts.length){
-   document.getElementById("actionBtn").textContent="FINISH TRAINING";
-   document.getElementById("actionBtn").onclick=()=>{};
- }
+  // Support L/R averaged fields
+  if(typeof v === "object"){
+    const L = Number(v.L||0);
+    const R = Number(v.R||0);
+    if(L>0 && R>0) return (L+R)/2;
+    return L>0 ? L : (R>0 ? R : 0);
+  }
+  return Number(v||0);
 }
 
-function startTimer(m){
- clearInterval(timer);
- let sec=m*60;
- timer=setInterval(()=>{
-  sec--;
-  document.getElementById("timer").textContent=
-   Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0");
-  if(sec%60===0)
-   new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=").play();
-  if(sec<=0)clearInterval(timer);
- },1000);
+function renderSettings(){
+  const host = $("settingsList");
+  host.innerHTML = "";
+
+  SETTINGS_SCHEMA.forEach(section=>{
+    const block = document.createElement("div");
+    block.className = "item";
+    block.innerHTML = `
+      <div class="top">
+        <div>
+          <p class="name">${section.group}</p>
+          <div class="meta">Vul jouw ${section.items[0]?.rmType || ""} per oefening in. Double = avg L/R.</div>
+        </div>
+        <span class="kbd">Afronden: ↓ op 4 kg</span>
+      </div>
+      <div class="hr"></div>
+      <div class="list" id="sec_${section.group.replace(/\W+/g,'_')}"></div>
+    `;
+    host.appendChild(block);
+
+    const sec = block.querySelector(`#sec_${section.group.replace(/\W+/g,'_')}`);
+    section.items.forEach(it=>{
+      const row = document.createElement("div");
+      row.className = "item";
+      row.style.padding = "12px";
+      row.style.background = "rgba(255,255,255,.02)";
+      row.innerHTML = `
+        <div class="top">
+          <div style="min-width:0">
+            <p class="name" style="font-size:14px">${it.label}</p>
+            <div class="meta">${it.rmType} • dice→%: single 65/75/85 • double (L+L..H+H)</div>
+          </div>
+          <span class="kbd">${it.key}</span>
+        </div>
+        <div class="hr"></div>
+        ${
+          it.lr ? `
+          <div class="twoCols">
+            <div>
+              <div class="mini">Links (${it.rmType})</div>
+              <input class="in" inputmode="decimal" placeholder="bijv. 32" data-key="${it.key}" data-side="L" value="${(settings?.[it.key]?.L ?? "")}"/>
+            </div>
+            <div>
+              <div class="mini">Rechts (${it.rmType})</div>
+              <input class="in" inputmode="decimal" placeholder="bijv. 32" data-key="${it.key}" data-side="R" value="${(settings?.[it.key]?.R ?? "")}"/>
+            </div>
+          </div>
+          ` : `
+          <div>
+            <div class="mini">RM (${it.rmType})</div>
+            <input class="in" inputmode="decimal" placeholder="bijv. 32" data-key="${it.key}" value="${(settings?.[it.key] ?? "")}"/>
+          </div>
+          `
+        }
+      `;
+      sec.appendChild(row);
+    });
+  });
+
+  // wire inputs
+  host.querySelectorAll("input.in").forEach(inp=>{
+    inp.addEventListener("input", ()=>{
+      const key = inp.dataset.key;
+      const side = inp.dataset.side;
+      const raw = inp.value.replace(",",".").trim();
+      const num = raw==="" ? "" : Number(raw);
+
+      if(side){
+        if(!settings[key] || typeof settings[key] !== "object") settings[key] = {L:"",R:""};
+        settings[key][side] = (num==="" || isNaN(num)) ? "" : num;
+      }else{
+        settings[key] = (num==="" || isNaN(num)) ? "" : num;
+      }
+      saveSettings(true);
+      // Update training view if currently on a rolled lift
+      render();
+    });
+  });
 }
+
+function saveSettings(silent=false){
+  localStorage.setItem(LS_SETTINGS, JSON.stringify(settings));
+  if(!silent){
+    flashNote("Settings opgeslagen.");
+  }
+}
+function loadSettings(){
+  try{
+    const s = JSON.parse(localStorage.getItem(LS_SETTINGS) || "{}");
+    return s && typeof s === "object" ? s : {};
+  }catch(e){ return {}; }
+}
+
+/* ------------------------ TRAINING STATE ------------------------ */
+
+function defaultState(){
+  return {
+    dayIndex: 0,        // 0..13
+    liftIndex: -1,      // -1 = not started today, else 0..n-1
+    todayPlan: [],      // computed list of lift types for that day
+    current: null,      // current lift roll + outputs
+    timer: {running:false, total:0, left:0, startedAt:0},
+    weekView: 1,        // for calendar highlighting
+    lastNote: "",
+  };
+}
+function loadState(){
+  try{
+    const s = JSON.parse(localStorage.getItem(LS_KEY) || "null");
+    if(!s) return defaultState();
+    return {...defaultState(), ...s};
+  }catch(e){ return defaultState(); }
+}
+function saveState(){
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+}
+
+function computePlanForDay(day){
+  if(day.kind==="GRINDS") return [...DAY_TEMPLATES.GRINDS];
+  if(day.kind==="BALLISTICS") return [...DAY_TEMPLATES.BALLISTICS];
+  if(day.kind==="VARIETY") return [...DAY_TEMPLATES.VARIETY];
+  return [];
+}
+
+function effortLabel(e){
+  if(e==="HEAVY") return "Heavy (100%)";
+  if(e==="MEDIUM") return "Medium (70–80%)";
+  if(e==="LIGHT") return "Light (50–60%)";
+  if(e==="VARIETY") return "Variety (quality focus)";
+  return "Off";
+}
+
+function typeTagFor(t){
+  if(t==="GRIND_SINGLE") return {txt:"GRIND • Single", cls:"good"};
+  if(t==="GRIND_DOUBLE") return {txt:"GRIND • Double", cls:"good"};
+  if(t==="BALLISTIC_SINGLE") return {txt:"BALLISTIC • Single", cls:"warn"};
+  if(t==="BALLISTIC_DOUBLE") return {txt:"BALLISTIC • Double", cls:"warn"};
+  if(t==="BODYWEIGHT") return {txt:"BODYWEIGHT", cls:""};
+  return {txt:"—", cls:""};
+}
+
+function laddersForType(t){
+  if(t==="GRIND_SINGLE" || t==="GRIND_DOUBLE"){
+    return [
+      {label:"1-2-3 (6 reps)", value:"1-2-3"},
+      {label:"1-2-3-4 (10 reps)", value:"1-2-3-4"},
+      {label:"1-2-3-4-5 (15 reps)", value:"1-2-3-4-5"},
+    ];
+  }
+  if(t==="BALLISTIC_DOUBLE"){
+    return [
+      {label:"2-4-6 (12 reps)", value:"2-4-6"},
+      {label:"2-4-6-8 (20 reps)", value:"2-4-6-8"},
+      {label:"2-4-6-8-10 (30 reps)", value:"2-4-6-8-10"},
+    ];
+  }
+  if(t==="BALLISTIC_SINGLE"){
+    return [
+      {label:"5-10 (15 reps)", value:"5-10"},
+      {label:"10-15-20 (45 reps)", value:"10-15-20"},
+      {label:"10-20 (30 reps)", value:"10-20"},
+    ];
+  }
+  // pullups: not laddered here; keep simple
+  return [{label:"Kwaliteit-reps (geen ladder)", value:"quality"}];
+}
+
+function ensureDayPlan(){
+  const day = DAYS[state.dayIndex];
+  if(!Array.isArray(state.todayPlan) || state.todayPlan.length===0 || state.todayPlanKind!==day.kind){
+    state.todayPlan = computePlanForDay(day);
+    state.todayPlanKind = day.kind;
+    state.liftIndex = -1;
+    state.current = null;
+    stopTimer();
+    saveState();
+  }
+}
+
+/* ------------------------ ROLL + LOAD COMPUTATION ------------------------ */
+
+function pickExerciseFromPool(poolName, er){
+  const pool = EXERCISES[poolName];
+  if(!pool) return null;
+  return pool[clamp(er-1,0,5)];
+}
+
+function computeLoad(exObj, lr){
+  // Bodyweight: no load
+  if(!exObj || exObj.type==="BODYWEIGHT") return {display:"—", detail:""};
+
+  const rm = getRM(exObj.key);
+  if(!rm || rm<=0){
+    return {display:"—", detail:`Vul eerst ${exObj.rmType} in bij Gewichten (${exObj.key}).`};
+  }
+
+  if(exObj.type==="GRIND_SINGLE" || exObj.type==="BALLISTIC_SINGLE"){
+    const pct = singlePct[clamp(lr-1,0,5)];
+    const w = pctOf(rm, pct);
+    return {display: fmtWeight(w), detail:`${exObj.rmType} ${rm} → ${pct}% → ${w} kg (↓4kg)`};
+  }
+
+  if(exObj.type==="GRIND_DOUBLE" || exObj.type==="BALLISTIC_DOUBLE"){
+    const [p1,p2] = doublePct[clamp(lr-1,0,5)];
+    const w1 = pctOf(rm, p1);
+    const w2 = pctOf(rm, p2);
+    return {display: fmtPair(w1,w2), detail:`${exObj.rmType} ${rm} → ${p1}%/${p2}% → ${w1}+${w2} kg (↓4kg)`};
+  }
+
+  return {display:"—", detail:""};
+}
+
+function rollLift(liftType){
+  // liftType can be: press/squat/pull/push/pullup or variety placeholders
+  const day = DAYS[state.dayIndex];
+
+  // Off day guard
+  if(day.kind==="OFF"){
+    state.current = {
+      title:"Off day",
+      meta:"Vandaag is rust. Morgen weer door.",
+      typeTag:{txt:"OFF", cls:""},
+      ladderOptions:[{label:"—", value:"—"}],
+      ladder:"—",
+      rolls:{er:"—", lr:"—", tr:"—"},
+      timeMin:0,
+      load:{display:"—", detail:""},
+      pool:"—",
+    };
+    saveState();
+    render();
+    return;
+  }
+
+  const er = roll1d6();
+  const lr = roll1d6();
+  const tr = roll2d6(); // 2..12
+
+  let poolName = liftType;
+  let exObj = null;
+
+  if(liftType==="var_grind"){
+    // variety grind: pick between press/squat (biased) with a die
+    const pick = roll1d6();
+    poolName = (pick<=4) ? "press" : "squat"; // bias towards press
+    exObj = pickExerciseFromPool(poolName, er);
+  }else if(liftType==="var_ballistic"){
+    // variety ballistic: pick between pull/push (biased towards pull)
+    const pick = roll1d6();
+    poolName = (pick<=4) ? "pull" : "push";
+    exObj = pickExerciseFromPool(poolName, er);
+  }else if(liftType==="var_optional_pullup"){
+    // optional pullup: 1d6 decides whether to include it
+    const include = roll1d6() >= 4; // 50%-ish
+    if(!include){
+      state.current = {
+        title:"Variety — Optionele Pull-up",
+        meta:"Deze ronde is overgeslagen (dobbelsteen gaf 'no').",
+        typeTag:{txt:"OPTIONAL", cls:""},
+        ladderOptions:[{label:"Kwaliteit-reps", value:"quality"}],
+        ladder:"quality",
+        rolls:{er:"—", lr:"—", tr:"—"},
+        timeMin:0,
+        load:{display:"—", detail:""},
+        pool:"pullup",
+      };
+      saveState(); render();
+      return;
+    }
+    poolName = "pullup";
+    exObj = pickExerciseFromPool("pullup", er);
+  }else{
+    exObj = pickExerciseFromPool(poolName, er);
+  }
+
+  const typeTag = typeTagFor(exObj?.type || "");
+  const ladderOptions = laddersForType(exObj?.type || "");
+  const ladder = ladderOptions[ladderOptions.length-1]?.value || ladderOptions[0]?.value || "—"; // default: longest (common)
+  const load = computeLoad(exObj, lr);
+
+  const sessionName = sessionTitle(day);
+
+  state.current = {
+    title: exObj ? exObj.name : "—",
+    meta: `${sessionName} • ${effortLabel(day.effort)} • ${tr} min`,
+    typeTag,
+    ladderOptions,
+    ladder,
+    rolls: {er, lr, tr},
+    timeMin: tr,
+    load,
+    pool: poolName,
+    exKey: exObj?.key || null,
+    rmType: exObj?.rmType || "—",
+    exType: exObj?.type || "",
+  };
+
+  state.timer = {running:false, total: tr*60, left: tr*60, startedAt:0};
+  saveState();
+  render();
+}
+
+function sessionTitle(day){
+  if(day.kind==="GRINDS"){
+    return `Grinds — ${day.effort.charAt(0)+day.effort.slice(1).toLowerCase()}`;
+  }
+  if(day.kind==="BALLISTICS"){
+    return `Ballistics — ${day.effort.charAt(0)+day.effort.slice(1).toLowerCase()}`;
+  }
+  if(day.kind==="VARIETY"){
+    return `Variety Day`;
+  }
+  return `Off`;
+}
+
+/* ------------------------ TIMER ------------------------ */
+
+let timerHandle = null;
+let wakeLock = null;
+
+async function requestWakeLock(){
+  try{
+    if("wakeLock" in navigator){
+      wakeLock = await navigator.wakeLock.request("screen");
+    }
+  }catch(e){}
+}
+
+function beep(){
+  // short, louder beep than the tiny silent one
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = "sine";
+  o.frequency.value = 880;
+  g.gain.value = 0.08;
+  o.connect(g); g.connect(ctx.destination);
+  o.start();
+  setTimeout(()=>{ o.stop(); ctx.close(); }, 90);
+}
+
+function startTimer(){
+  if(!state.current || !state.current.timeMin || state.current.timeMin<=0) return;
+  requestWakeLock();
+  stopTimer();
+
+  state.timer.running = true;
+  state.timer.total = state.current.timeMin * 60;
+  state.timer.left = state.timer.total;
+  state.timer.startedAt = Date.now();
+  saveState();
+
+  renderTimer();
+
+  timerHandle = setInterval(()=>{
+    state.timer.left -= 1;
+    if(state.timer.left < 0) state.timer.left = 0;
+
+    // minute beep (when hitting exact minute boundaries, excluding start)
+    if(state.timer.left > 0 && state.timer.left % 60 === 0){
+      try{ beep(); }catch(e){}
+    }
+    renderTimer();
+
+    if(state.timer.left <= 0){
+      stopTimer(false);
+      // end beep
+      try{ beep(); }catch(e){}
+    }
+  }, 1000);
+}
+
+function stopTimer(reset=true){
+  if(timerHandle){ clearInterval(timerHandle); timerHandle = null; }
+  state.timer.running = false;
+  if(reset){
+    state.timer.left = state.timer.total || 0;
+  }
+  saveState();
+  renderTimer();
+}
+
+function renderTimer(){
+  const left = state.timer.left || 0;
+  const total = state.timer.total || 0;
+
+  const mm = Math.floor(left/60);
+  const ss = String(left%60).padStart(2,"0");
+  $("timerText").textContent = `${mm}:${ss}`;
+
+  const pct = total>0 ? (100 * (1 - (left/total))) : 0;
+  $("timerBar").style.width = `${clamp(pct,0,100)}%`;
+}
+
+/* ------------------------ ACTIONS ------------------------ */
+
+function startOrNext(){
+  ensureDayPlan();
+  const day = DAYS[state.dayIndex];
+
+  if(day.kind==="OFF"){
+    // just advance
+    advanceDay();
+    return;
+  }
+
+  // If not started today: start first lift
+  if(state.liftIndex === -1){
+    state.liftIndex = 0;
+    saveState();
+    rollLift(state.todayPlan[state.liftIndex]);
+    updatePrimaryBtn();
+    return;
+  }
+
+  // If current timer not running, start it; else next lift
+  if(state.current && !state.timer.running && state.timer.left === state.timer.total){
+    // start timer
+    startTimer();
+    updatePrimaryBtn();
+    return;
+  }
+
+  if(state.timer.running){
+    stopTimer(true);
+  }
+
+  // Next lift
+  state.liftIndex += 1;
+  if(state.liftIndex >= state.todayPlan.length){
+    // Finish day
+    finishDay();
+    return;
+  }
+
+  saveState();
+  rollLift(state.todayPlan[state.liftIndex]);
+  updatePrimaryBtn();
+}
+
+function reroll(){
+  ensureDayPlan();
+  const day = DAYS[state.dayIndex];
+  if(day.kind==="OFF"){
+    flashNote("Off day: niets te rollen.");
+    return;
+  }
+  if(state.liftIndex < 0){
+    flashNote("Start eerst de lift om te kunnen rerollen.");
+    return;
+  }
+  stopTimer(true);
+  rollLift(state.todayPlan[state.liftIndex]);
+  flashNote("Gererolled.");
+  updatePrimaryBtn();
+}
+
+function finishDay(){
+  stopTimer(true);
+  state.current = {
+    title:"Finish training",
+    meta:"Dag afgerond. Volgende dag?",
+    typeTag:{txt:"DONE", cls:"good"},
+    ladderOptions:[{label:"—",value:"—"}],
+    ladder:"—",
+    rolls:{er:"—", lr:"—", tr:"—"},
+    timeMin:0,
+    load:{display:"—", detail:""},
+    pool:"—",
+  };
+  saveState();
+  render();
+  $("primaryBtn").textContent = "Volgende dag";
+  $("primaryBtn").onclick = ()=>advanceDay();
+}
+
+function advanceDay(){
+  stopTimer(true);
+  state.dayIndex = (state.dayIndex + 1) % DAYS.length;
+  state.todayPlan = [];
+  state.todayPlanKind = null;
+  state.liftIndex = -1;
+  state.current = null;
+  saveState();
+  ensureDayPlan();
+  render();
+  updatePrimaryBtn();
+  flashNote("Doorgeschoven naar volgende dag.");
+}
+
+function resetAll(){
+  if(!confirm("Reset training-state? (Settings blijven behouden)")) return;
+  stopTimer(true);
+  state = defaultState();
+  saveState();
+  ensureDayPlan();
+  render();
+  updatePrimaryBtn();
+  flashNote("Reset uitgevoerd.");
+}
+
+function updatePrimaryBtn(){
+  const day = DAYS[state.dayIndex];
+
+  if(day.kind==="OFF"){
+    $("primaryBtn").textContent = "Volgende dag";
+    $("primaryBtn").onclick = ()=>advanceDay();
+    return;
+  }
+
+  $("primaryBtn").onclick = ()=>startOrNext();
+
+  if(state.liftIndex === -1){
+    $("primaryBtn").textContent = "Start lift";
+    return;
+  }
+
+  if(state.timer.running){
+    $("primaryBtn").textContent = "Stop & Next";
+    return;
+  }
+
+  if(state.current && state.timer.left === state.timer.total && state.timer.total>0){
+    $("primaryBtn").textContent = "Start timer";
+    return;
+  }
+
+  // fallback
+  $("primaryBtn").textContent = "Next";
+}
+
+/* ------------------------ CALENDAR ------------------------ */
+
+function renderCalendar(){
+  const host = $("calendarList");
+  host.innerHTML = "";
+
+  const weekToShow = state.weekView;
+  const start = weekToShow===1 ? 0 : 7;
+  const end = start + 7;
+
+  for(let i=start;i<end;i++){
+    const d = DAYS[i];
+    const isActive = (i===state.dayIndex);
+    const label = `${d.dow} • Week ${d.week}`;
+
+    let kind = d.kind;
+    let sub = "";
+    if(kind==="GRINDS") sub = `Grinds • ${effortLabel(d.effort)}`;
+    if(kind==="BALLISTICS") sub = `Ballistics • ${effortLabel(d.effort)}`;
+    if(kind==="VARIETY") sub = `Variety`;
+    if(kind==="OFF") sub = `Off`;
+
+    const item = document.createElement("div");
+    item.className = "item";
+    item.style.borderColor = isActive ? "rgba(25,212,123,.45)" : "var(--line)";
+    item.style.background = isActive ? "rgba(25,212,123,.08)" : "rgba(255,255,255,.03)";
+    item.innerHTML = `
+      <div class="top">
+        <div>
+          <p class="name">${label} — ${kind}</p>
+          <div class="meta">${sub}</div>
+        </div>
+        <span class="kbd">${isActive ? "HUIDIG" : "Selecteer"}</span>
+      </div>
+    `;
+    item.onclick = ()=>{
+      stopTimer(true);
+      state.dayIndex = i;
+      state.todayPlan = [];
+      state.todayPlanKind = null;
+      state.liftIndex = -1;
+      state.current = null;
+      saveState();
+      ensureDayPlan();
+      render();
+      updatePrimaryBtn();
+    };
+    host.appendChild(item);
+  }
+}
+
+function toggleWeek(){
+  state.weekView = (state.weekView===1) ? 2 : 1;
+  saveState();
+  renderCalendar();
+}
+
+function jumpToToday(){
+  // approximate: map JS day (Sun=0) to our schedule with Monday as start
+  const js = new Date().getDay(); // 0..6, Sun..Sat
+  const map = {1:0,2:1,3:2,4:3,5:4,6:5,0:6}; // Mon->0 .. Sun->6
+  const idxInWeek = map[js] ?? 0;
+
+  // choose current week view start
+  const base = (state.weekView===1) ? 0 : 7;
+  const target = base + idxInWeek;
+
+  stopTimer(true);
+  state.dayIndex = target;
+  state.todayPlan = [];
+  state.todayPlanKind = null;
+  state.liftIndex = -1;
+  state.current = null;
+  saveState();
+  ensureDayPlan();
+  render();
+  updatePrimaryBtn();
+  flashNote("Naar (ongeveer) vandaag gesprongen.");
+}
+
+/* ------------------------ RENDER ------------------------ */
+
+function render(){
+  ensureDayPlan();
+  const day = DAYS[state.dayIndex];
+
+  $("dayPill").textContent = `Week ${day.week} • ${day.dow} • ${day.kind}`;
+  $("effortPill").innerHTML = `Effort: <b>${effortLabel(day.effort)}</b>`;
+
+  $("sessionName").textContent = sessionTitle(day);
+  const planText = (day.kind==="OFF") ? "Rustdag" : `Plan: ${state.todayPlan.join(" → ")}`;
+  $("sessionPlan").textContent = planText;
+
+  const total = state.todayPlan.length || 0;
+  const currentNum = state.liftIndex<0 ? 0 : (state.liftIndex+1);
+  $("liftCounter").textContent = `Lift ${currentNum}/${total}`;
+
+  // Current lift panel
+  if(!state.current){
+    $("exerciseName").textContent = "Klaar om te starten";
+    $("exerciseMeta").innerHTML = `Klik <b>Start lift</b> om te rollen: oefening + tijd + gewicht.`;
+    $("diceRolls").textContent = "—";
+    $("weightOut").textContent = "—";
+    $("typeTag").textContent = "—";
+    $("typeTag").className = "tag";
+    populateLadder([{label:"—", value:"—"}], "—");
+    stopTimer(true);
+  }else{
+    $("exerciseName").textContent = state.current.title;
+    $("exerciseMeta").textContent = state.current.meta;
+
+    const r = state.current.rolls || {};
+    const rollsTxt = (r.er==="—") ? "—" : `Oef: ${r.er} • Gewicht: ${r.lr} • Tijd: ${r.tr} min`;
+    $("diceRolls").textContent = rollsTxt;
+
+    $("weightOut").textContent = state.current.load?.display || "—";
+
+    const t = state.current.typeTag || {txt:"—", cls:""};
+    $("typeTag").textContent = t.txt;
+    $("typeTag").className = "tag " + (t.cls || "");
+
+    populateLadder(state.current.ladderOptions || [{label:"—",value:"—"}], state.current.ladder);
+
+    // timer defaults based on current
+    if(!state.timer.total || state.timer.total !== (state.current.timeMin*60)){
+      state.timer.total = (state.current.timeMin||0)*60;
+      state.timer.left = state.timer.total;
+      saveState();
+    }
+    renderTimer();
+  }
+
+  // Footer guidance
+  $("footerNote").innerHTML = makeFooterGuidance(day);
+
+  renderCalendar();
+  updatePrimaryBtn();
+}
+
+function populateLadder(options, selected){
+  const sel = $("ladderSelect");
+  sel.innerHTML = "";
+  options.forEach(o=>{
+    const opt = document.createElement("option");
+    opt.value = o.value;
+    opt.textContent = o.label;
+    if(o.value === selected) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  sel.onchange = ()=>{
+    if(state.current){
+      state.current.ladder = sel.value;
+      saveState();
+      flashNote("Ladder ingesteld.");
+    }
+  };
+}
+
+function makeFooterGuidance(day){
+  if(day.kind==="OFF"){
+    return `Tip: Off days zijn onderdeel van ETK+ “continuity”. Maak er eventueel een “tonic” wandeling van.`;
+  }
+  if(day.effort==="HEAVY"){
+    return `<b>Heavy day:</b> 100% effort binnen de tijd, maar houd ladder + rep-kwaliteit strak.`;
+  }
+  if(day.effort==="MEDIUM"){
+    return `<b>Medium day:</b> richt op ~70–80% van wat je <i>zou kunnen</i> doen. Laat 2–3 reps “in the tank”.`;
+  }
+  if(day.effort==="LIGHT"){
+    return `<b>Light day:</b> richt op ~50–60%. Techniek, snelheid en spanning — niet slopen.`;
+  }
+  return `<b>Variety:</b> gebruik dit voor techniek, varianten, en “kwaliteit boven kwantiteit”.`;
+}
+
+function flashNote(msg){
+  state.lastNote = msg;
+  saveState();
+  $("timerHint").textContent = msg;
+  setTimeout(()=>{
+    $("timerHint").textContent = "De timer piept elke minuut. Wake lock wordt geprobeerd op mobiele apparaten.";
+  }, 1800);
+}
+
+/* ------------------------ SETTINGS EXPORT/IMPORT ------------------------ */
+
+async function exportSettings(){
+  try{
+    const txt = JSON.stringify(settings, null, 2);
+    await navigator.clipboard.writeText(txt);
+    flashNote("Settings gekopieerd naar clipboard (JSON).");
+  }catch(e){
+    alert("Kon niet naar clipboard schrijven. Kopieer handmatig uit console/localStorage.");
+  }
+}
+async function importSettings(){
+  const txt = prompt("Plak hier je settings JSON:");
+  if(!txt) return;
+  try{
+    const obj = JSON.parse(txt);
+    if(!obj || typeof obj !== "object") throw new Error("invalid");
+    settings = obj;
+    saveSettings(true);
+    renderSettings();
+    render();
+    flashNote("Settings geïmporteerd.");
+  }catch(e){
+    alert("Ongeldig JSON.");
+  }
+}
+
+/* ------------------------ INIT ------------------------ */
+
+function init(){
+  ensureDayPlan();
+  render();
+  updatePrimaryBtn();
+}
+init();
 </script>
-
 </body>
 </html>
